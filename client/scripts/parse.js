@@ -6,7 +6,7 @@ var Parse = {
 
     $.ajax({
       url: Parse.server,
-      type: 'POST',
+      type: 'POST', //This is the HTTP request to communicate with server.
       data: JSON.stringify(message),
       contentType: 'application/json',
       success: successCB,
