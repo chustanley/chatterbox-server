@@ -191,7 +191,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._responseCode).to.equal(200);
     var messages = JSON.parse(res._data);
     expect(messages.length > 1).to.equal(true);
-    expect(res._ended).to.equal(true); // comment
+    expect(res._ended).to.equal(true); // comment 2
   });
 
 
