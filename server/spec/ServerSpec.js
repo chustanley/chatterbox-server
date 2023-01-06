@@ -105,10 +105,6 @@ describe('Node Server Request Listener Function', function() {
 
 
 
-
-
-
-
   it('Should have createdAt property in messages object', function() {
     var stubMsg = {
       username: 'Stan',
@@ -162,6 +158,39 @@ describe('Node Server Request Listener Function', function() {
     expect(messages[0].username).to.equal('Joseph');
     expect(messages[0].text).to.equal('its lit!');
     expect(messages[0].message_id).greaterThan(0);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should take more than one message', function() {
+    var firstMsg = {
+      username: 'Jono',
+      text: 'first message!'
+    };
+
+    var secondMsg = {
+      username: 'Jon',
+      text: 'sec message!'
+    };
+
+    var req = new stubs.request('/classes/messages', 'POST', firstMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    req = new stubs.request('/classes/messages', 'POST', secondMsg);
+    res = new stubs.response();
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data);
+    expect(messages.length > 1).to.equal(true);
     expect(res._ended).to.equal(true);
   });
 
