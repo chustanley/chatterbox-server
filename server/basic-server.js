@@ -21,9 +21,10 @@ var ip = '127.0.0.1';
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
 
-var server = http.createServer(handleRequest.requestHandler);
+//This is how you create a server object / AND IT is known as an event emitter where you can attach a listener to later.
+var server = http.createServer(handleRequest.requestHandler); // this function is called once for every HTTP request
 console.log('Listening on http://' + ip + ':' + port);
-server.listen(port, ip);
+server.listen(port, ip); // what does listen do?
 
 // To start this server, run:
 //

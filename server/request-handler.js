@@ -16,18 +16,16 @@ this file and include it in basic-server.js so that it actually works.
 
 
 var MessageData = require('./MessageData.js');
-
-// var hold = {
-//   array: []
-// };
-
-
+var message_id = 0;
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept, authorization',
   'access-control-max-age': 10 // Seconds.
 };
+
+var headers = defaultCorsHeaders;
+headers['Content-Type'] = 'application/json';
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module. (which is the Basic-Server.js file)
@@ -47,33 +45,36 @@ var requestHandler = function(request, response) {
 
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url); //assuming this is the incoming request
-  var headers = defaultCorsHeaders;
-  var statusCode = 200;
 
-  //if request.method is get, and request.url is /classes/messages
+  var statusCode;
 
-  // repond with data from a file that conntains all the messages.
+  if (request.url === '/classes/messages' && request.method === 'GET') { // IF CLIENT WANTS TO RECIEVE DATA
+    statusCode = 200;
 
-  if (request.url === '/classes/messages' && request.method === 'GET') {
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify(MessageData.MessageData));
-    console.log(request.data);
-  } else if (request.url === '/classes/messages' && request.method === 'POST') {
-    // The outgoing status.
+    response.writeHead(statusCode, headers); //send back the status code, send to client side, information needs to be right inorder for the data to get sent properly or if not / at all.
+
+    response.end(JSON.stringify(MessageData.MessageData.data)); //last step we do - whatever we put into it is data that gets sent over to the user / client
+
+  } else if (request.url === '/classes/messages' && request.method === 'POST') { // IF CLIENT WANTS TO ADD DATA
     statusCode = 201;
     // // See the note below about CORS headers.
     //var headers = defaultCorsHeaders;
-
-    //headers['Content-Type'] = 'text/plain';// change to html? then send in chatterbox?
     var data = '';
+
     request.on('data', (chunk) => {
-      data += chunk;
-      MessageData.MessageData.push(JSON.parse(data));
+      data += chunk; // this turns the 'encrypted chunk into a readible object that is now a string inside of data.
+
+      data = JSON.parse(data);
+      data.message_id = message_id++;
+      data.createdAt = new Date();
+
+      MessageData.MessageData.data.unshift(data);
+      //maybe add data = ''
     });
 
     // .writeHead() writes to the request line and headers of the response,
     // which includes the status and all headers.
-    response.writeHead(statusCode, { 'Content-Type': 'application/json' }); // assuming this is the outgoing response.
+    response.writeHead(statusCode, headers); // assuming this is the outgoing response.
 
     // Make sure to always call response.end() - Node may not send
     // anything back to the client until you do. The string you pass to
@@ -83,6 +84,11 @@ var requestHandler = function(request, response) {
     // Calling .end "flushes" the response's internal buffer, forcing
     // node to actually send all the data over to the client.
 
+
+    //MAYBE ONLY SEND BACK DATA THAT ONE MESSAGE???
+    response.end(JSON.stringify(MessageData.MessageData.data));
+  } else if (request.url === '/classes/messages' && request.method === 'OPTIONS') {
+    response.writeHead(200, headers);
     response.end();
   } else {
     response.writeHead(404, { 'Content-Type': 'application/json' });

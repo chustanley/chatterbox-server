@@ -1,6 +1,6 @@
-var MessageData = [
-
-];
+var MessageData = {
+  data: []
+};
 
 
 exports.MessageData = MessageData;

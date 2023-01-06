@@ -91,4 +91,79 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+
+
+  it('Should 200 when asked for OPTIONS', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    expect(res._ended).to.equal(true);
+  });
+
+
+
+
+
+
+
+  it('Should have createdAt property in messages object', function() {
+    var stubMsg = {
+      username: 'Stan',
+      text: 'Believe it!'
+    };
+
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res); //adds to backend
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data);
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Stan');
+    expect(messages[0].text).to.equal('Believe it!');
+    expect(messages[0].createdAt).to.not.equal(undefined);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should have message_id property in messages object', function() {
+    var stubMsg = {
+      username: 'Joseph',
+      text: 'its lit!'
+    };
+
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res); //adds to backend
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data);
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Joseph');
+    expect(messages[0].text).to.equal('its lit!');
+    expect(messages[0].message_id).greaterThan(0);
+    expect(res._ended).to.equal(true);
+  });
+
+
 });
